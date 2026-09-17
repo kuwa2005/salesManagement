@@ -9,11 +9,11 @@ Public Class InfrastructureSetting
     ''' <summary>
     ''' データベースを初期化する
     ''' </summary>
-    ''' <param name="resetDebugDatabase">DEBUG 時に既存 DB を削除して作り直す場合は True（テスト向け）</param>
-    Public Function InitializeDB(Optional ByVal resetDebugDatabase As Boolean = False) As Boolean
+    ''' <param name="forceResetDebugDb">DEBUG 時に既存 DB を削除して作り直す場合は True（テスト向け）</param>
+    Public Function InitializeDB(Optional ByVal forceResetDebugDb As Boolean = False) As Boolean
 #If DEBUG Then
-        If resetDebugDatabase OrElse IsDebugResetRequested() Then
-            ResetDebugDatabase()
+        If forceResetDebugDb OrElse IsDebugResetRequested() Then
+            DeleteDebugDatabaseFile()
         End If
 #End If
         If IsExistDB() = False Then
@@ -55,7 +55,7 @@ Public Class InfrastructureSetting
     ''' <summary>
     ''' デバッグ用データベースファイルを削除する
     ''' </summary>
-    Private Sub ResetDebugDatabase()
+    Private Sub DeleteDebugDatabaseFile()
         ' 接続プールが残っていると Delete に失敗するため解放する
         System.Data.SQLite.SQLiteConnection.ClearAllPools()
         GC.Collect()
