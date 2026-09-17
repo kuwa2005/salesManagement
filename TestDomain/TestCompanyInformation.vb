@@ -46,4 +46,24 @@ Imports Domain
         Assert.IsTrue(c.HasError)
     End Sub
 
+
+    <TestMethod()>
+    Public Sub Address2_Nothing_ReportsAddress2ErrorKey()
+        Dim c = New CompanyInformation
+        With c
+            .Name = "テスト株式会社"
+            .PostalCode = "100-8111"
+            .Address1 = "東京都千代田区"
+            .Address2 = "千代田1-1"
+            .TEL = "03-9999-9999"
+            .FAX = "03-8888-8888"
+        End With
+
+        c.Address2 = Nothing
+
+        Assert.IsFalse(c.Validate)
+        Assert.AreNotEqual(String.Empty, c.Item(NameOf(c.Address2)))
+        Assert.AreEqual(String.Empty, c.Item(NameOf(c.Address1)))
+    End Sub
+
 End Class

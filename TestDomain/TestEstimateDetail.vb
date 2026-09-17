@@ -55,4 +55,28 @@ Public Class TestEstimateDetail
         Assert.IsFalse(d.HasError)
     End Sub
 
+    <TestMethod()>
+    Public Sub Quantity_Zero_IsInvalid()
+        Dim d As New EstimateDetail()
+        d.DisplayOrder = 1
+        d.ItemName = "商品A"
+        d.Quantity = 0
+        d.UnitPrice = 100
+
+        Assert.IsFalse(d.Validate)
+        Assert.AreNotEqual(String.Empty, d.Item(NameOf(d.Quantity)))
+    End Sub
+
+    <TestMethod()>
+    Public Sub Quantity_One_IsValid()
+        Dim d As New EstimateDetail()
+        d.DisplayOrder = 1
+        d.ItemName = "商品A"
+        d.Quantity = 1
+        d.UnitPrice = 100
+
+        Assert.IsTrue(d.Validate)
+        Assert.AreEqual(String.Empty, d.Item(NameOf(d.Quantity)))
+    End Sub
+
 End Class

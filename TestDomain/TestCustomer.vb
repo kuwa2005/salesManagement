@@ -12,7 +12,25 @@ Imports Domain
         Public EmpRepo As EmployeeRepositoryStub
         Public Employee As Employee
         Public Payment As PaymentCondition
-    End Class
+    
+    <TestMethod()> Public Sub Address1_TooLong_UsesPropertyErrorKey()
+        Dim fx = CreateFixture()
+        Dim c = New Customer(fx.CustRepo, fx.PayRepo, fx.EmpRepo)
+        With c
+            .Name = "株式会社サンプル"
+            .KanaName = "かぶしきがいしゃさんぷる"
+            .PIC = fx.Employee
+            .PaymentCondition = fx.Payment
+            .PostalCode = "100-0001"
+            .Address1 = New String("あ"c, 51)
+            .Address2 = "1-1"
+        End With
+
+        Assert.IsFalse(c.Validate)
+        Assert.AreNotEqual(String.Empty, c.Item(NameOf(c.Address1)))
+    End Sub
+
+End Class
 
     Private Function CreateFixture() As Fixture
         Dim fx As New Fixture

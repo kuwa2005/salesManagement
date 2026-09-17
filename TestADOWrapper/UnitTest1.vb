@@ -133,6 +133,30 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         End Using
     End Sub
 
+    <TestMethod()> Public Sub TestTransactionVisibleOnlyAfterCommit()
+        Using accessor As New ADOWrapper.DBAccessor(ConnectionString)
+            accessor.BeginTransaction()
+            Dim q = accessor.CreateQuery
+            q.Query.AppendLine("INSERT INTO test(text) VALUES('in-txn');")
+            Assert.AreEqual(1, q.ExecNonQuery())
+
+            ' 別接続からは未コミット行が見えないこと
+            Using other As New ADOWrapper.DBAccessor(ConnectionString)
+                Dim check = other.CreateQuery
+                check.Query.AppendLine("SELECT COUNT(*) FROM test WHERE text = 'in-txn'")
+                Assert.AreEqual(0, CInt(check.ExecScalar()))
+            End Using
+
+            accessor.Commit()
+        End Using
+
+        Using accessor As New ADOWrapper.DBAccessor(ConnectionString)
+            Dim q = accessor.CreateQuery
+            q.Query.AppendLine("SELECT COUNT(*) FROM test WHERE text = 'in-txn'")
+            Assert.AreEqual(1, CInt(q.ExecScalar()))
+        End Using
+    End Sub
+
     <TestMethod()> Public Sub TestSimpleQuery()
         Using accessor As New ADOWrapper.DBAccessor(ConnectionString)
             Dim q = accessor.CreateQuery

@@ -72,4 +72,30 @@ Public Class TestPaymentCondition
         Assert.AreNotEqual(p.Item(NameOf(p.Name)), String.Empty)
     End Sub
 
+    <TestMethod()>
+    Public Sub Name_Length20_IsValid()
+        Dim repo As New PaymentConditionRepositoryStub
+        Dim p = New PaymentCondition(repo)
+        p.Name = New String("あ"c, 20)
+        p.CutOff = 20
+        p.DueDate = 20
+        p.MonthOffset = 1
+
+        Assert.IsTrue(p.Validate)
+        Assert.AreEqual(String.Empty, p.Item(NameOf(p.Name)))
+    End Sub
+
+    <TestMethod()>
+    Public Sub Name_Length21_IsInvalid()
+        Dim repo As New PaymentConditionRepositoryStub
+        Dim p = New PaymentCondition(repo)
+        p.Name = New String("あ"c, 21)
+        p.CutOff = 20
+        p.DueDate = 20
+        p.MonthOffset = 1
+
+        Assert.IsFalse(p.Validate)
+        Assert.AreNotEqual(String.Empty, p.Item(NameOf(p.Name)))
+    End Sub
+
 End Class
