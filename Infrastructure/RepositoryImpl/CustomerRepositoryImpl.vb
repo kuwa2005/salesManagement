@@ -447,6 +447,7 @@ Public Class CustomerRepositoryImpl
             If ret <> 1 Then
                 Return False
             End If
+            _LastInsertId = c.ID
             Return True
         End Using
     End Function

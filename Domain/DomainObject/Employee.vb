@@ -239,10 +239,13 @@ Public Class Employee
     ''' </summary>
     ''' <returns>登録成功:True 登録失敗:False</returns>
     Public Function Save() As Boolean
+        Dim wasNew = (ID = -1)
         If _EmployeeRepo.Save(Me) = False Then
             Return False
         End If
-        Me._ID = _EmployeeRepo.LastInsertID
+        If wasNew Then
+            Me._ID = _EmployeeRepo.LastInsertID
+        End If
         Return True
     End Function
 

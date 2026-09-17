@@ -487,6 +487,7 @@ Public Class EstimateEntry
         '登録
         If _Estimate.Save() = False Then
             MessageBox.Show(SaveErrorMessage)
+            Return False
         End If
         Return True
     End Function

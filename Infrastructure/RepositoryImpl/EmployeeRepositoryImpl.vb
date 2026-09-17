@@ -404,6 +404,7 @@ Public Class EmployeeRepositoryImpl
                 Return False
             End If
 
+            _LastInsertId = e.ID
             accessor.Commit()
             Return True
 

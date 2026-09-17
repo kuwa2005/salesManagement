@@ -423,10 +423,13 @@ Public Class Customer
     ''' </summary>
     ''' <returns>登録成功:True 登録失敗:False</returns>
     Public Function Save() As Boolean
+        Dim wasNew = (ID = -1)
         If _CustomerRepo.Save(Me) = False Then
             Return False
         End If
-        _ID = _CustomerRepo.LastInsertID
+        If wasNew Then
+            _ID = _CustomerRepo.LastInsertID
+        End If
         Return True
     End Function
 

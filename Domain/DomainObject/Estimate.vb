@@ -679,12 +679,15 @@ Public Class Estimate
         End If
 
         '保存
+        Dim wasNew = (ID = -1)
         If _EstimateRepo.Save(Me) = False Then
             Return False
         End If
 
-        'IDを入れておく
-        _ID = _EstimateRepo.LastInsertID
+        '新規作成時のみ採番 ID を反映（更新時は既存 ID を維持）
+        If wasNew Then
+            _ID = _EstimateRepo.LastInsertID
+        End If
         Return True
     End Function
 
