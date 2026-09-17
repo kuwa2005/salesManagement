@@ -45,6 +45,14 @@ msbuild SalesManagement.sln /t:Restore,Build /p:Configuration=Debug /p:BuildProj
 3. **Setup** を右クリック → **リビルド**
 4. 出力は `Setup\Release\` 配下の `.msi` / `setup.exe`
 
+### Setup 依存関係メモ
+
+- 帳票（`.rdlc`）はアプリに埋め込みリソースとして同梱するため、MSI への Report フォルダ同梱は不要です（除外済み）
+- `Microsoft.ReportViewer.*` は NuGet **150.x（アセンブリ 15）**、`Microsoft.SqlServer.Types` は **16**、`System.Data.SQLite` は **1.0.119** を想定
+- デザイン時のみの依存（`ReportViewer.Design` / `EnvDTE` / `VisualStudio.*.Interop` 等）は MSI から除外
+- VS 上で Detected Dependencies が古い場合は、Setup を一度閉じて開き直すか、依存を「更新」してからリビルドしてください
+- Primary Output は `Application\bin\Release\Application.exe` を参照します
+
 ## 機能
 
 見積書を作成するだけのアプリケーションです.

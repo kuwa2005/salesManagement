@@ -267,4 +267,15 @@
     <Content Include="SqlServerTypes\readme.htm" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+  <!-- Setup.vdproj が参照する x86/x64 配下へ SQLite.Interop が必ず出ることを確認する -->
+  <Target Name="EnsureSqliteInteropForSetup" AfterTargets="Build">
+    <PropertyGroup>
+      <_SqliteInteropX86>$(OutputPath)x86\SQLite.Interop.dll</_SqliteInteropX86>
+      <_SqliteInteropX64>$(OutputPath)x64\SQLite.Interop.dll</_SqliteInteropX64>
+    </PropertyGroup>
+    <Warning Condition="!Exists('$(_SqliteInteropX86)')"
+             Text="SQLite.Interop.dll (x86) が $(OutputPath)x86 にありません。Setup ビルド前に NuGet 復元とリビルドを確認してください。" />
+    <Warning Condition="!Exists('$(_SqliteInteropX64)')"
+             Text="SQLite.Interop.dll (x64) が $(OutputPath)x64 にありません。Setup ビルド前に NuGet 復元とリビルドを確認してください。" />
+  </Target>
 </Project>
