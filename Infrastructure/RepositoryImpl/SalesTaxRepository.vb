@@ -96,7 +96,7 @@ Public Class SalesTaxRepositoryImpl
                 .AppendLine("FROM")
                 .AppendLine("   sales_taxes")
                 .AppendLine("WHERE")
-                .AppendLine("   apply_start_date <= strftime(@apply_start_date)")
+                .AppendLine("   apply_start_date <= @apply_start_date")
                 .AppendLine("ORDER BY")
                 .AppendLine("   apply_start_date desc")
             End With
@@ -167,9 +167,9 @@ Public Class SalesTaxRepositoryImpl
                 .AppendLine("FROM")
                 .AppendLine("   sales_taxes")
                 .AppendLine("WHERE")
-                .AppendLine("   apply_start_date >= strftime(@start_date)")
+                .AppendLine("   apply_start_date >= @start_date")
                 .AppendLine("AND")
-                .AppendLine("   apply_start_date <= strftime(@end_date)")
+                .AppendLine("   apply_start_date <= @end_date")
             End With
 
             With q.Parameters

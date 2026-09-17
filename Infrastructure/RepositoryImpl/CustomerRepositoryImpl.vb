@@ -199,7 +199,7 @@ Public Class CustomerRepositoryImpl
                 'かな名(前方一致)
                 If cond.KanaNameForwardMatch <> String.Empty Then
                     .AppendLine("AND")
-                    .AppendLine("   name LIKE @kana_name")
+                    .AppendLine("   kana_name LIKE @kana_name")
                 End If
                 '営業担当者
                 If cond.PIC IsNot Nothing Then

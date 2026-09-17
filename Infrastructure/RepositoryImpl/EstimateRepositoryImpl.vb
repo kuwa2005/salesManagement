@@ -50,9 +50,9 @@ Public Class EstimateRepositoryImpl
                 .AppendLine("FROM")
                 .AppendLine("   estimates")
                 .AppendLine("WHERE")
-                .AppendLine("   created_at >= strftime(@created_at_start)")
+                .AppendLine("   created_at >= @created_at_start")
                 .AppendLine("AND")
-                .AppendLine("   created_at <= strftime(@created_at_end)")
+                .AppendLine("   created_at <= @created_at_end")
             End With
 
             With q.Parameters
@@ -114,30 +114,30 @@ Public Class EstimateRepositoryImpl
                 '見積番号
                 If c.EstimateNoForwardMatch <> "" Then
                     .AppendLine("AND")
-                    .AppendLine("   estimate_number LIKE '@estimate_number%'")
+                    .AppendLine("   estimate_number LIKE @estimate_number")
                 End If
 
                 '件名
                 If c.TitleForwardMatch <> "" Then
                     .AppendLine("AND")
-                    .AppendLine("   title LIKE '%@title%'")
+                    .AppendLine("   title LIKE @title")
                 End If
 
                 '発行日(区間開始)
                 .AppendLine("AND")
-                .AppendLine("   print_date >= strftime(@print_date_start)")
+                .AppendLine("   print_date >= @print_date_start")
 
                 '発行日(区間終了)
                 .AppendLine("AND")
-                .AppendLine("   print_date <= strftime(@print_date_end)")
+                .AppendLine("   print_date <= @print_date_end")
 
                 '見積有効期限(区間開始)
                 .AppendLine("AND")
-                .AppendLine("   effective_date >= strftime(@effective_date_start)")
+                .AppendLine("   effective_date >= @effective_date_start")
 
                 '見積有効期限(区間終了)
                 .AppendLine("AND")
-                .AppendLine("   effective_date <= strftime(@effective_date_end)")
+                .AppendLine("   effective_date <= @effective_date_end")
 
                 '営業担当
                 If c.PICEmployee IsNot Nothing Then
@@ -156,12 +156,12 @@ Public Class EstimateRepositoryImpl
             With q.Parameters
                 '見積番号
                 If c.EstimateNoForwardMatch <> "" Then
-                    .Add("@estimate_number", c.EstimateNoForwardMatch)
+                    .Add("@estimate_number", c.EstimateNoForwardMatch & "%")
                 End If
 
                 '件名
                 If c.TitleForwardMatch <> "" Then
-                    .Add("@title", c.TitleForwardMatch)
+                    .Add("@title", "%" & c.TitleForwardMatch & "%")
                 End If
 
                 '発行日(区間開始)
