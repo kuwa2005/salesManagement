@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <!-- VS2026 / .NET Framework 4.8 向けの共通設定 -->
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+  </PropertyGroup>
+</Project>

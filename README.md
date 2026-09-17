@@ -1,24 +1,24 @@
 # 見積管理システム
 
-Winforms(VB.net)のサンプルアプリケーションです.
+Winforms(VB.NET)のサンプルアプリケーションです.
 
 見積の作成・印刷を行うアプリです.
 
 業務システム構築の際のアプリケーション設計を考えるために作成されました.
 
-Visual Studio Community 2017を利用して開発しています.
+Visual Studio 2026 (Community) で開発・ビルドすることを想定しています.
 
 ## 利用ミドルウェア
 
 このアプリケーションは以下のミドルウェアを利用しています.
 
- 1. ADO.NET(SQLite3)
- 1. Microsoft Report
- 1. Microsoft Visual Studio 2017 Installer Projects
- 1. MS Test
+ 1. ADO.NET (`System.Data.SQLite.Core`)
+ 1. Microsoft Report Viewer (`Microsoft.ReportingServices.ReportViewerControl.Winforms`)
+ 1. MSTest
 
-2,3についてはVisual Studio Communityの導入とは別にインストールが必要です.
+ターゲットフレームワークは **.NET Framework 4.8** です（Developer Pack のインストールが必要です）。
 
+インストーラ (`Setup/Setup.vdproj`) はソリューションから除外しています。再ビルドする場合は Visual Studio Marketplace の **Microsoft Visual Studio Installer Projects** 拡張を入れ、ソリューションにプロジェクトを追加してください。
 
 ## 機能
 
@@ -47,7 +47,7 @@ Visual Studio Community 2017を利用して開発しています.
 
 ## アプリケーション設計/構成
 
-このアプリケーションは8つのプロジェクトで構成されています.
+このアプリケーションは7つのプロジェクトで構成されています（Setup は別途）。
 
 ```
 ├─ADOWrapper
@@ -63,7 +63,6 @@ Visual Studio Community 2017を利用して開発しています.
 ├─Infrastructure
 │  ├─DDL
 │  └─RepositoryImpl
-├─Setup
 ├─TestADOWrapper
 ├─TestDomain
 ├─TestInfrastructure
@@ -71,9 +70,7 @@ Visual Studio Community 2017を利用して開発しています.
 
 Testから始まるプロジェクトは各プロジェクトのテストプロジェクトです.
 
-Setupはインストーラ作成のためのプロジェクトです.
-
-各プロジェクトの依存関係は以下の通りです.(Test, Setupプロジェクトを除く)
+各プロジェクトの依存関係は以下の通りです.(Testプロジェクトを除く)
 
 ```
 ---------------        --------------- 
@@ -143,6 +140,16 @@ Domainプロジェクトのデータ構造をそのままバインディング�
       ------------------
       | User Interface |
       ------------------
+```
+
+## ビルド
+
+Visual Studio 2026 で `SalesManagement.sln` を開き、NuGet 復元後にビルドしてください。
+
+コマンドライン例:
+
+```bat
+msbuild SalesManagement.sln /t:Restore,Build /p:Configuration=Debug
 ```
 
 ## デモデータ
