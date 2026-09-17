@@ -138,7 +138,9 @@ Public Class SQLite3ADOWrapper
             '実行するSQL
             .CommandText = m_query.ToString
             'トランザクション
-            .Transaction = DirectCast(Transaction, SQLite.SQLiteTransaction2)
+            If Transaction IsNot Nothing Then
+                .Transaction = DirectCast(Transaction, SQLite.SQLiteTransaction)
+            End If
             'パラメータがあれば利用
             If m_parameters IsNot Nothing Then
                 .Parameters.AddRange(m_parameters.ToArray)

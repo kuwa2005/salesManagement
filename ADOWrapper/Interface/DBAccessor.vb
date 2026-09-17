@@ -2,6 +2,8 @@
 Option Infer On
 
 Imports System
+Imports System.Data
+Imports System.Data.SQLite
 
 ''' <summary>
 ''' データベースへの1コネクション/1トランザクションを表現するクラスです
@@ -45,14 +47,26 @@ Public Class DBAccessor
     ''' 設定に従って特定DBMS向けのIADOWrapperのインスタンスを生成します
     ''' </summary>
     Public Function CreateQuery() As IADOWrapper
-        Return New SQLite3ADOWrapper(m_connection)
+        Dim q = New SQLite3ADOWrapper(m_connection)
+        q.Transaction = m_transaction
+        Return q
     End Function
 
     ''' <summary>
     ''' このDBAccessorでのトランザクションを開始します
     ''' </summary>
     Public Sub BeginTransaction()
-        m_transaction = m_connection.BeginTransaction()
+        If m_transaction IsNot Nothing Then
+            Throw New InvalidOperationException("Transaction is already begun.")
+        End If
+
+        ' SQLite は Deferred だと TOCTOU になりやすいため Immediate で開始
+        Dim sqliteCon = TryCast(m_connection, SQLite.SQLiteConnection)
+        If sqliteCon IsNot Nothing Then
+            m_transaction = sqliteCon.BeginTransaction(IsolationLevel.Serializable)
+        Else
+            m_transaction = m_connection.BeginTransaction()
+        End If
     End Sub
 
     ''' <summary>
@@ -63,6 +77,8 @@ Public Class DBAccessor
             Throw New Exception("Transaction is not begun.")
         End If
         m_transaction.Commit()
+        m_transaction.Dispose()
+        m_transaction = Nothing
     End Sub
 
     ''' <summary>
@@ -73,6 +89,8 @@ Public Class DBAccessor
             Throw New Exception("Transaction is not begun.")
         End If
         m_transaction.Rollback()
+        m_transaction.Dispose()
+        m_transaction = Nothing
     End Sub
 
 #End Region
@@ -119,6 +137,14 @@ Public Class DBAccessor
     Protected Overridable Sub Dispose(disposing As Boolean)
         If Not disposedValue Then
             If disposing Then
+                If m_transaction IsNot Nothing Then
+                    Try
+                        m_transaction.Rollback()
+                    Catch
+                    End Try
+                    m_transaction.Dispose()
+                    m_transaction = Nothing
+                End If
                 If m_connection IsNot Nothing Then
                     m_connection.Close()
                     m_connection.Dispose()
