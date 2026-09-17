@@ -87,6 +87,7 @@ Public Class SalesTax
         End Get
         Set(value As Decimal)
             _TaxRate = value / CDec(100.0)
+            ValidateTaxRate()
         End Set
     End Property
 

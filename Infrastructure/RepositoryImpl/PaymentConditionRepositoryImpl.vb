@@ -391,6 +391,7 @@ Public Class PaymentConditionRepositoryImpl
                 Return False
             End If
 
+            _LastInsertId = e.ID
             accessor.Commit()
             Return True
 

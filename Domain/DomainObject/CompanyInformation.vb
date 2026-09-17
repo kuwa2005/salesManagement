@@ -284,7 +284,7 @@ Public Class CompanyInformation
         _errors.Remove(NameOf(Address2))
 
         'Nothingは許可しない
-        If _Address1 Is Nothing Then
+        If _Address2 Is Nothing Then
             _errors(NameOf(Address2)) = Address2DoNotNothing
             Return
         End If

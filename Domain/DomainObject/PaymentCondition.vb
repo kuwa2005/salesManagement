@@ -97,6 +97,7 @@ Public Class PaymentCondition
         End Get
         Set(value As Integer)
             _DueDate = value
+            ValidateDueDate()
         End Set
     End Property
 
@@ -253,7 +254,7 @@ Public Class PaymentCondition
         End If
 
         '支払条件名は20文字以内でなければならない
-        If _Name.Length >= 20 Then
+        If _Name.Length > 20 Then
             _errors(NameOf(Name)) = NameIsTooLong
         End If
     End Sub

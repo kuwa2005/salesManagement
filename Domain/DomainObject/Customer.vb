@@ -391,7 +391,7 @@ Public Class Customer
 
         '住所1は必ず50文字以内
         If _Address1.Length > 50 Then
-            _errors(NameOf(_Address1)) = Address1IsTooLong
+            _errors(NameOf(Address1)) = Address1IsTooLong
         End If
     End Sub
 
@@ -410,7 +410,7 @@ Public Class Customer
 
         '住所2は必ず50文字以内
         If _Address2.Length > 50 Then
-            _errors(NameOf(_Address2)) = Address2IsTooLong
+            _errors(NameOf(Address2)) = Address2IsTooLong
         End If
     End Sub
 

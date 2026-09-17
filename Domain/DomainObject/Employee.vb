@@ -86,6 +86,7 @@ Public Class Employee
         End Get
         Set(value As String)
             _Name = value
+            ValidateName()
         End Set
     End Property
 
