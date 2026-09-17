@@ -34,6 +34,19 @@ Public Class EstimateDetail
         _ID = id
     End Sub
 
+    ''' <summary>
+    ''' INSERT 後に採番された ID を割り当てる（未永続化時のみ）
+    ''' </summary>
+    Public Sub BindPersistedId(persistedId As Integer)
+        If _ID <> -1 Then
+            Throw New InvalidOperationException("既に永続化済みの明細に ID を再割当できません")
+        End If
+        If persistedId < 0 Then
+            Throw New ArgumentOutOfRangeException(NameOf(persistedId))
+        End If
+        _ID = persistedId
+    End Sub
+
 #Region "値プロパティ"
 
     Public ReadOnly Property ID As Integer
@@ -79,7 +92,7 @@ Public Class EstimateDetail
         End Get
         Set(value As Integer)
             _Quantity = value
-            ValidateItemName()
+            ValidateQuantity()
         End Set
     End Property
 
@@ -206,8 +219,8 @@ Public Class EstimateDetail
         'エラーを一度クリア
         _errors.Remove(NameOf(Quantity))
 
-        '数量は0から999まで
-        If _Quantity < 0 Then
+        '数量は1から999まで
+        If _Quantity < 1 Then
             _errors(NameOf(Quantity)) = QuantityOutOfRange
         End If
 

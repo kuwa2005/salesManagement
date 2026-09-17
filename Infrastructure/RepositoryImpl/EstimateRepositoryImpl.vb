@@ -312,7 +312,10 @@ Public Class EstimateRepositoryImpl
             '明細を登録
             '=========================================
             For Each d As EstimateDetail In e.Details
-                CreateDetail(accessor, d, inserted_id)
+                If CreateDetail(accessor, d, inserted_id) = False Then
+                    accessor.RollBack()
+                    Return False
+                End If
             Next
 
             _LastInsertId = inserted_id
@@ -365,6 +368,13 @@ Public Class EstimateRepositoryImpl
         If ret <> 1 Then
             Return False
         End If
+
+        Dim idQuery = accessor.CreateQuery
+        With idQuery.Query
+            .AppendLine("SELECT last_insert_rowid()")
+        End With
+        Dim newId = CInt(idQuery.ExecScalar())
+        d.BindPersistedId(newId)
 
         Return True
 
@@ -506,16 +516,30 @@ Public Class EstimateRepositoryImpl
             End If
 
             '=========================================
-            '明細を更新
+            '明細を登録/更新
             '=========================================
             For Each d As EstimateDetail In e.Details
-                UpdateDetail(accessor, d, e.ID)
+                If d.ID < 0 Then
+                    If CreateDetail(accessor, d, e.ID) = False Then
+                        accessor.RollBack()
+                        Return False
+                    End If
+                Else
+                    If UpdateDetail(accessor, d, e.ID) = False Then
+                        accessor.RollBack()
+                        Return False
+                    End If
+                End If
             Next
             '=========================================
-            '明細を削除
+            'この見積から外れた明細を削除
             '=========================================
-            DeleteDetail(accessor, e.Details, e.ID)
+            If DeleteDetail(accessor, e.Details, e.ID) = False Then
+                accessor.RollBack()
+                Return False
+            End If
 
+            _LastInsertId = e.ID
             accessor.Commit()
             Return True
 
@@ -543,6 +567,8 @@ Public Class EstimateRepositoryImpl
             .AppendLine(",updated_at = @updated_at")
             .AppendLine("WHERE")
             .AppendLine("   id = @id")
+            .AppendLine("AND")
+            .AppendLine("   estimate_id = @estimate_id")
         End With
 
         With q.Parameters
@@ -570,35 +596,44 @@ Public Class EstimateRepositoryImpl
 #Region "Delete"
 
     ''' <summary>
-    ''' 明細レコードを削除
+    ''' この見積に属し、引数リストに残っていない明細レコードを削除
     ''' </summary>
-    ''' <returns>ロールバックが必要ならfalse</returns>
+    ''' <returns>失敗時 false</returns>
     Private Function DeleteDetail(ByVal accessor As ADOWrapper.DBAccessor, ByVal details As List(Of EstimateDetail), eid As Integer) As Boolean
+        Dim keptIds As New List(Of Integer)
+        For Each d As EstimateDetail In details
+            If d.ID >= 0 Then
+                keptIds.Add(d.ID)
+            End If
+        Next
+
         Dim q = accessor.CreateQuery
         With q.Query
             .AppendLine("DELETE FROM")
             .AppendLine("   estimate_details")
             .AppendLine("WHERE")
-            .AppendLine("   id NOT IN(")
-            Dim d As EstimateDetail = Nothing
-            For i As Integer = 0 To details.Count - 1
-                d = details(i)
-                If i <> 0 Then
-                    .AppendLine(",")
-                End If
-                .AppendLine("@" + d.ID.ToString)
-            Next
-            .AppendLine("   )")
+            .AppendLine("   estimate_id = @estimate_id")
+            If keptIds.Count > 0 Then
+                .AppendLine("AND")
+                .AppendLine("   id NOT IN(")
+                For i As Integer = 0 To keptIds.Count - 1
+                    If i <> 0 Then
+                        .AppendLine(",")
+                    End If
+                    .AppendLine("@keep_id_" & i.ToString())
+                Next
+                .AppendLine("   )")
+            End If
         End With
 
         With q.Parameters
-            For Each d As EstimateDetail In details
-                .Add("@" + d.ID.ToString, d.ID)
+            .Add("@estimate_id", eid)
+            For i As Integer = 0 To keptIds.Count - 1
+                .Add("@keep_id_" & i.ToString(), keptIds(i))
             Next
         End With
 
-        Dim ret = q.ExecNonQuery
-
+        q.ExecNonQuery()
         Return True
 
     End Function
