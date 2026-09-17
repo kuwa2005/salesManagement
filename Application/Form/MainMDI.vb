@@ -24,8 +24,14 @@ Public Class MainMDI
     ''' <param name="e"></param>
     Private Sub バックアップの作成ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles バックアップの作成ToolStripMenuItem.Click
         Using form As New SaveFileDialog
+            form.Filter = "SQLite DB (*.db)|*.db|すべてのファイル (*.*)|*.*"
+            form.DefaultExt = "db"
             If form.ShowDialog() = DialogResult.OK Then
-                Infrastructure.InfrastractureBackup.BackupToFile(form.FileName)
+                If Infrastructure.InfrastractureBackup.BackupToFile(form.FileName) Then
+                    MessageBox.Show("バックアップを作成しました。")
+                Else
+                    MessageBox.Show("バックアップの作成に失敗しました。")
+                End If
             End If
         End Using
     End Sub
@@ -37,8 +43,18 @@ Public Class MainMDI
     ''' <param name="e"></param>
     Private Sub バックアップのインポートToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles バックアップのインポートToolStripMenuItem.Click
         Using form As New OpenFileDialog
+            form.Filter = "SQLite DB (*.db)|*.db|すべてのファイル (*.*)|*.*"
             If form.ShowDialog() = DialogResult.OK Then
-                Infrastructure.InfrastractureBackup.RestoreFromFile(form.FileName)
+                If MessageBox.Show("現在のデータをバックアップで置き換えます。よろしいですか？",
+                                   "確認", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) <> DialogResult.Yes Then
+                    Return
+                End If
+
+                If Infrastructure.InfrastractureBackup.RestoreFromFile(form.FileName) Then
+                    MessageBox.Show("リストアが完了しました。開いている画面を閉じてから操作を続けてください。")
+                Else
+                    MessageBox.Show("リストアに失敗しました。ファイルが正しい SQLite データベースか確認してください。")
+                End If
             End If
         End Using
     End Sub
