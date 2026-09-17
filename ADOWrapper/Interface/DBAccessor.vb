@@ -61,7 +61,7 @@ Public Class DBAccessor
         End If
 
         ' SQLite は Deferred だと TOCTOU になりやすいため Immediate で開始
-        Dim sqliteCon = TryCast(m_connection, SQLite.SQLiteConnection)
+        Dim sqliteCon = TryCast(m_connection, SQLiteConnection)
         If sqliteCon IsNot Nothing Then
             m_transaction = sqliteCon.BeginTransaction(IsolationLevel.Serializable)
         Else
@@ -110,7 +110,23 @@ Public Class DBAccessor
         End Select
 
         m_connection.Open()
+        ApplySqlitePragmas()
 
+    End Sub
+
+    ''' <summary>
+    ''' SQLite 同時アクセス向け PRAGMA を適用
+    ''' </summary>
+    Private Sub ApplySqlitePragmas()
+        Dim sqliteCon = TryCast(m_connection, SQLiteConnection)
+        If sqliteCon Is Nothing Then
+            Return
+        End If
+
+        Using cmd = sqliteCon.CreateCommand()
+            cmd.CommandText = "PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;"
+            cmd.ExecuteNonQuery()
+        End Using
     End Sub
 
     ''' <summary>

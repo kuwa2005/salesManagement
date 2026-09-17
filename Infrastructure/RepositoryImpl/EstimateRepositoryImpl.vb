@@ -248,53 +248,76 @@ Public Class EstimateRepositoryImpl
         Using accessor As New ADOWrapper.DBAccessor()
             accessor.BeginTransaction()
 
-            Dim q = accessor.CreateQuery
-            With q.Query
-                .AppendLine("INSERT INTO estimates(")
-                .AppendLine(" estimate_number")
-                .AppendLine(",customer_id")
-                .AppendLine(",title")
-                .AppendLine(",due_date")
-                .AppendLine(",payment_id")
-                .AppendLine(",pic_employee_id")
-                .AppendLine(",apply_tax_id")
-                .AppendLine(",print_date")
-                .AppendLine(",effective_date")
-                .AppendLine(",remarks")
-                .AppendLine(",created_at")
-                .AppendLine(")")
-                .AppendLine("VALUES(")
-                .AppendLine(" @estimate_number")
-                .AppendLine(",@customer_id")
-                .AppendLine(",@title")
-                .AppendLine(",@due_date")
-                .AppendLine(",@payment_id")
-                .AppendLine(",@pic_employee_id")
-                .AppendLine(",@apply_tax_id")
-                .AppendLine(",@print_date")
-                .AppendLine(",@effective_date")
-                .AppendLine(",@remarks")
-                .AppendLine(",@created_at")
-                .AppendLine(")")
-            End With
+            Const maxAttempts As Integer = 5
+            Dim inserted_id As Integer = -1
+            Dim inserted As Boolean = False
 
-            With q.Parameters
-                .Add("@estimate_number", e.EstimateNo)
-                .Add("@customer_id", e.Customer.ID)
-                .Add("@title", e.Title)
-                .Add("@due_date", e.DueDate.ToString("yyyy-MM-dd HH:mm:ss"))
-                .Add("@payment_id", e.PaymentCondition.ID)
-                .Add("@pic_employee_id", e.PICEmployee.ID)
-                .Add("@apply_tax_id", e.SalesTax.ID)
-                .Add("@print_date", e.IssueDate.ToString("yyyy-MM-dd HH:mm:ss"))
-                .Add("@effective_date", e.EffectiveDate.ToString("yyyy-MM-dd HH:mm:ss"))
-                .Add("@remarks", e.Remarks)
-                .Add("@created_at", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
-            End With
+            For attempt = 1 To maxAttempts
+                e.EstimateNo = AllocateNextEstimateNo(accessor, Date.Today)
 
-            Dim ret = q.ExecNonQuery
+                Dim q = accessor.CreateQuery
+                With q.Query
+                    .AppendLine("INSERT INTO estimates(")
+                    .AppendLine(" estimate_number")
+                    .AppendLine(",customer_id")
+                    .AppendLine(",title")
+                    .AppendLine(",due_date")
+                    .AppendLine(",payment_id")
+                    .AppendLine(",pic_employee_id")
+                    .AppendLine(",apply_tax_id")
+                    .AppendLine(",print_date")
+                    .AppendLine(",effective_date")
+                    .AppendLine(",remarks")
+                    .AppendLine(",created_at")
+                    .AppendLine(")")
+                    .AppendLine("VALUES(")
+                    .AppendLine(" @estimate_number")
+                    .AppendLine(",@customer_id")
+                    .AppendLine(",@title")
+                    .AppendLine(",@due_date")
+                    .AppendLine(",@payment_id")
+                    .AppendLine(",@pic_employee_id")
+                    .AppendLine(",@apply_tax_id")
+                    .AppendLine(",@print_date")
+                    .AppendLine(",@effective_date")
+                    .AppendLine(",@remarks")
+                    .AppendLine(",@created_at")
+                    .AppendLine(")")
+                End With
 
-            If ret <> 1 Then
+                With q.Parameters
+                    .Add("@estimate_number", e.EstimateNo)
+                    .Add("@customer_id", e.Customer.ID)
+                    .Add("@title", e.Title)
+                    .Add("@due_date", e.DueDate.ToString("yyyy-MM-dd HH:mm:ss"))
+                    .Add("@payment_id", e.PaymentCondition.ID)
+                    .Add("@pic_employee_id", e.PICEmployee.ID)
+                    .Add("@apply_tax_id", e.SalesTax.ID)
+                    .Add("@print_date", e.IssueDate.ToString("yyyy-MM-dd HH:mm:ss"))
+                    .Add("@effective_date", e.EffectiveDate.ToString("yyyy-MM-dd HH:mm:ss"))
+                    .Add("@remarks", e.Remarks)
+                    .Add("@created_at", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
+                End With
+
+                Try
+                    Dim ret = q.ExecNonQuery
+                    If ret <> 1 Then
+                        accessor.RollBack()
+                        Return False
+                    End If
+                    inserted = True
+                    Exit For
+                Catch ex As System.Data.SQLite.SQLiteException
+                    ' UNIQUE(estimate_number) 競合時は採番し直して再試行
+                    If IsUniqueConstraintViolation(ex) AndAlso attempt < maxAttempts Then
+                        Continue For
+                    End If
+                    accessor.RollBack()
+                    Return False
+                End Try
+            Next
+
+            If inserted = False Then
                 accessor.RollBack()
                 Return False
             End If
@@ -306,7 +329,7 @@ Public Class EstimateRepositoryImpl
             End With
 
             Dim check_ret = check_q.ExecScalar
-            Dim inserted_id = CType(check_ret, Integer)
+            inserted_id = CType(check_ret, Integer)
 
             '=========================================
             '明細を登録
@@ -324,6 +347,41 @@ Public Class EstimateRepositoryImpl
 
             Return True
         End Using
+    End Function
+
+    ''' <summary>
+    ''' 同一トランザクション内で見積番号を採番する
+    ''' </summary>
+    Private Function AllocateNextEstimateNo(ByVal accessor As ADOWrapper.DBAccessor, ByVal d As Date) As String
+        Dim prefix = d.ToString("yyyyMMdd")
+        Dim q = accessor.CreateQuery
+        With q.Query
+            .AppendLine("SELECT")
+            .AppendLine("   COALESCE(MAX(CAST(SUBSTR(estimate_number, 9) AS INTEGER)), 0) + 1")
+            .AppendLine("FROM")
+            .AppendLine("   estimates")
+            .AppendLine("WHERE")
+            .AppendLine("   estimate_number LIKE @prefix")
+        End With
+        q.Parameters.Add("@prefix", prefix & "%")
+
+        Dim nextSeq = CInt(q.ExecScalar())
+        Return prefix & nextSeq.ToString("000")
+    End Function
+
+    ''' <summary>
+    ''' UNIQUE 制約違反かどうか
+    ''' </summary>
+    Private Function IsUniqueConstraintViolation(ByVal ex As System.Data.SQLite.SQLiteException) As Boolean
+        If ex Is Nothing Then
+            Return False
+        End If
+        ' 19 = SQLITE_CONSTRAINT
+        If ex.ResultCode = System.Data.SQLite.SQLiteErrorCode.Constraint OrElse
+           ex.ResultCode = System.Data.SQLite.SQLiteErrorCode.Constraint_Unique Then
+            Return True
+        End If
+        Return ex.Message.IndexOf("UNIQUE", StringComparison.OrdinalIgnoreCase) >= 0
     End Function
 
     ''' <summary>
