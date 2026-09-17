@@ -8,7 +8,7 @@ Imports System.Text
 ''' <summary>
 ''' 永続化先のバックアップとリストアを提供する
 ''' </summary>
-Public Class InfrastractureBackup
+Public Class InfrastructureBackup
 
     Private Shared ReadOnly SqliteHeader As Byte() =
         Encoding.ASCII.GetBytes("SQLite format 3" & ChrW(0))

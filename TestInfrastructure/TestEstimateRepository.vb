@@ -18,7 +18,7 @@ Public Class TestEstimateRepository
     <TestInitialize()>
     Public Sub Setup()
         Dim setting = New InfrastructureSetting
-        setting.InitializeDB()
+        setting.InitializeDB(resetDebugDatabase:=True)
     End Sub
 
     Private Function SeedMasters() As Masters

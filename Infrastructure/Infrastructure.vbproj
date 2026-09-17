@@ -44,7 +44,7 @@
     <OptionCompare>Binary</OptionCompare>
   </PropertyGroup>
   <PropertyGroup>
-    <OptionStrict>Off</OptionStrict>
+    <OptionStrict>On</OptionStrict>
   </PropertyGroup>
   <PropertyGroup>
     <OptionInfer>On</OptionInfer>
@@ -74,7 +74,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helper.vb" />
-    <Compile Include="InfrastractureBackup.vb" />
+    <Compile Include="InfrastructureBackup.vb" />
     <Compile Include="InfrastructureSetting.vb" />
     <Compile Include="RepositoryImpl\CompanyInformationImpl.vb" />
     <Compile Include="RepositoryImpl\CustomerRepositoryImpl.vb" />

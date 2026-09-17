@@ -198,7 +198,10 @@ Public Class PaymentCondition
     ''' <returns></returns>
     Public ReadOnly Property [Error] As String Implements IDataErrorInfo.Error
         Get
-            Return String.Empty
+            If _errors Is Nothing OrElse _errors.Count = 0 Then
+                Return String.Empty
+            End If
+            Return String.Join("; ", _errors.Values)
         End Get
     End Property
 
@@ -322,14 +325,18 @@ Public Class PaymentCondition
 #Region "オーバーライド"
 
     Public Overrides Function Equals(obj As Object) As Boolean
-        '型が異なれば異なる
+        If obj Is Nothing Then
+            Return False
+        End If
         If obj.GetType <> GetType(PaymentCondition) Then
             Return False
         End If
         Dim c = DirectCast(obj, PaymentCondition)
-
-        'ID値が同じなら同じ
         Return Me.ID = c.ID
+    End Function
+
+    Public Overrides Function GetHashCode() As Integer
+        Return ID.GetHashCode()
     End Function
 
 #End Region

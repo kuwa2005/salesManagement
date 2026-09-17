@@ -328,13 +328,11 @@ Public Class Estimate
     ''' </summary>
     ''' <returns></returns>
     Public Function RemoveDetail(ByVal display_order As Integer) As Boolean
-        Try
-            Dim idx = _Details.FindIndex(Function(x) x.DisplayOrder = display_order)
-            _Details.RemoveAt(idx)
-        Catch ex As Exception
+        Dim idx = _Details.FindIndex(Function(x) x.DisplayOrder = display_order)
+        If idx < 0 Then
             Return False
-        End Try
-
+        End If
+        _Details.RemoveAt(idx)
         Return True
     End Function
 
@@ -432,7 +430,10 @@ Public Class Estimate
     ''' <returns></returns>
     Public ReadOnly Property [Error] As String Implements IDataErrorInfo.Error
         Get
-            Return String.Empty
+            If _errors Is Nothing OrElse _errors.Count = 0 Then
+                Return String.Empty
+            End If
+            Return String.Join("; ", _errors.Values)
         End Get
     End Property
 
@@ -716,6 +717,9 @@ Public Class Estimate
 #Region "オーバーライド"
 
     Public Overrides Function Equals(obj As Object) As Boolean
+        If obj Is Nothing Then
+            Return False
+        End If
         '型が異なれば異なる
         If obj.GetType <> GetType(Estimate) Then
             Return False
@@ -724,6 +728,10 @@ Public Class Estimate
 
         'ID値が同じなら同じ
         Return Me.ID = c.ID
+    End Function
+
+    Public Overrides Function GetHashCode() As Integer
+        Return ID.GetHashCode()
     End Function
 
 #End Region

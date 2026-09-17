@@ -101,7 +101,7 @@ Public Class Employee
         End Get
         Set(value As String)
             _NameKana = value
-            ValidaNameKana()
+            ValidateNameKana()
         End Set
     End Property
 
@@ -142,7 +142,10 @@ Public Class Employee
     ''' <returns></returns>
     Public ReadOnly Property [Error] As String Implements IDataErrorInfo.Error
         Get
-            Return String.Empty
+            If _errors Is Nothing OrElse _errors.Count = 0 Then
+                Return String.Empty
+            End If
+            Return String.Join("; ", _errors.Values)
         End Get
     End Property
 
@@ -158,7 +161,7 @@ Public Class Employee
         '各項目個別のチェックを実施
         ValidateEmployeeNo()
         ValidateName()
-        ValidaNameKana()
+        ValidateNameKana()
 
         '永続化も含めた項目全体の整合性チェックを実施
         'エラーリストのクリアのため他の要素の後に実施しないとならない
@@ -221,7 +224,7 @@ Public Class Employee
     ''' <summary>
     ''' 従業員名(かな)を検証
     ''' </summary>
-    Private Sub ValidaNameKana()
+    Private Sub ValidateNameKana()
         '一度エラーをクリア
         _errors.Remove(NameOf(NameKana))
 
@@ -255,14 +258,18 @@ Public Class Employee
 #Region "オーバーライド"
 
     Public Overrides Function Equals(obj As Object) As Boolean
-        '型が異なれば異なる
+        If obj Is Nothing Then
+            Return False
+        End If
         If obj.GetType <> GetType(Employee) Then
             Return False
         End If
         Dim c = DirectCast(obj, Employee)
-
-        'ID値が同じなら同じ
         Return Me.ID = c.ID
+    End Function
+
+    Public Overrides Function GetHashCode() As Integer
+        Return ID.GetHashCode()
     End Function
 
 #End Region

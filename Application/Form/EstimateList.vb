@@ -13,7 +13,7 @@ Public Class EstimateList
     ''' </summary>
     ''' <param name="sender"></param>
     ''' <param name="e"></param>
-    Private Sub CustomerList_Load(sender As Object, e As EventArgs) Handles Me.Load
+    Private Sub EstimateList_Load(sender As Object, e As EventArgs) Handles Me.Load
         'フォームコントロールの設定
         SetupControls()
     End Sub
@@ -34,12 +34,12 @@ Public Class EstimateList
     ''' </summary>
     ''' <param name="sender"></param>
     ''' <param name="e"></param>
-    Private Sub CustomerDataGridView_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles EstimateDataGridView.CellContentClick
+    Private Sub EstimateDataGridView_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles EstimateDataGridView.CellContentClick
 
         Select Case e.ColumnIndex
             Case 0
                 '編集ボタンクリック時
-                CustomerDataGridView_EditButtonClick(sender, e)
+                EstimateDataGridView_EditButtonClick(sender, e)
         End Select
 
     End Sub
@@ -61,7 +61,7 @@ Public Class EstimateList
     ''' </summary>
     ''' <param name="sender"></param>
     ''' <param name="e"></param>
-    Private Sub CustomerDataGridView_EditButtonClick(sender As Object, e As DataGridViewCellEventArgs)
+    Private Sub EstimateDataGridView_EditButtonClick(sender As Object, e As DataGridViewCellEventArgs)
         Dim gridview = DirectCast(sender, DataGridView)
         Dim estPres As EstimateGridViewPresentation = DirectCast(gridview.CurrentRow.DataBoundItem, EstimateGridViewPresentation)
 
@@ -100,7 +100,7 @@ Public Class EstimateList
     ''' </summary>
     ''' <param name="sender"></param>
     ''' <param name="e"></param>
-    Private Sub CustomerList_Activated(sender As Object, e As EventArgs) Handles Me.Activated
+    Private Sub EstimateList_Activated(sender As Object, e As EventArgs) Handles Me.Activated
         'コンボボックスの設定
         UpdateControlDataSource()
     End Sub

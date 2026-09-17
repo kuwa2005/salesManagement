@@ -19,6 +19,8 @@ Visual Studio 2026 (Community) で開発・ビルドすることを想定して�
 
 ターゲットフレームワークは **.NET Framework 4.8** です（Developer Pack のインストールが必要です）。
 
+DEBUG 起動では、既定で開発用 DB（`myDb.db`）を削除しません。リセットしたい場合は環境変数 `SM_RESET_DEBUG_DB=1` を設定するか、実行ディレクトリに `RESET_DEBUG_DB` ファイルを置いてください。
+
 ### インストーラ拡張（初回のみ）
 
 `Setup` プロジェクト（`.vdproj`）を開くには、Visual Studio 2026 で次を入れます。

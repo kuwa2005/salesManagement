@@ -5,5 +5,7 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <!-- ソースは Option Strict On。プロジェクト既定も On に揃える -->
+    <OptionStrict>On</OptionStrict>
   </PropertyGroup>
 </Project>

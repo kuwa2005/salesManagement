@@ -129,7 +129,10 @@ Public Class SalesTax
     ''' <returns></returns>
     Public ReadOnly Property [Error] As String Implements IDataErrorInfo.Error
         Get
-            Return String.Empty
+            If _errors Is Nothing OrElse _errors.Count = 0 Then
+                Return String.Empty
+            End If
+            Return String.Join("; ", _errors.Values)
         End Get
     End Property
 
@@ -144,7 +147,7 @@ Public Class SalesTax
     Public Function Validate() As Boolean
         ValidateApplyStartDate()
         ValidateTaxRate()
-        ValidaateTotal()
+        ValidateTotal()
 
         Return Me.HasError = False
     End Function
@@ -173,7 +176,7 @@ Public Class SalesTax
     ''' <summary>
     ''' オブジェクト全体での整合性検証
     ''' </summary>
-    Private Sub ValidaateTotal()
+    Private Sub ValidateTotal()
         '登録済みの日付は重複して登録できない
         Dim tax = _repo.FindByApplyDate(_ApplyStartDate)
         If tax IsNot Nothing AndAlso tax.ID <> _ID Then
@@ -186,14 +189,18 @@ Public Class SalesTax
 #Region "オーバーライド"
 
     Public Overrides Function Equals(obj As Object) As Boolean
-        '型が異なれば異なる
+        If obj Is Nothing Then
+            Return False
+        End If
         If obj.GetType <> GetType(SalesTax) Then
             Return False
         End If
         Dim c = DirectCast(obj, SalesTax)
-
-        'ID値が同じなら同じ
         Return Me.ID = c.ID
+    End Function
+
+    Public Overrides Function GetHashCode() As Integer
+        Return ID.GetHashCode()
     End Function
 
 #End Region

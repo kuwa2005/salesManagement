@@ -10,7 +10,7 @@ Imports Infrastructure
 
     <TestInitialize()> Public Sub Setup()
         Dim setting = New InfrastructureSetting
-        setting.InitializeDB()
+        setting.InitializeDB(resetDebugDatabase:=True)
     End Sub
 
     <TestMethod()> Public Sub TestSaveAndLoad()

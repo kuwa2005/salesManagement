@@ -27,7 +27,7 @@ Public Class MainMDI
             form.Filter = "SQLite DB (*.db)|*.db|すべてのファイル (*.*)|*.*"
             form.DefaultExt = "db"
             If form.ShowDialog() = DialogResult.OK Then
-                If Infrastructure.InfrastractureBackup.BackupToFile(form.FileName) Then
+                If Infrastructure.InfrastructureBackup.BackupToFile(form.FileName) Then
                     MessageBox.Show("バックアップを作成しました。")
                 Else
                     MessageBox.Show("バックアップの作成に失敗しました。")
@@ -50,7 +50,7 @@ Public Class MainMDI
                     Return
                 End If
 
-                If Infrastructure.InfrastractureBackup.RestoreFromFile(form.FileName) Then
+                If Infrastructure.InfrastructureBackup.RestoreFromFile(form.FileName) Then
                     MessageBox.Show("リストアが完了しました。開いている画面を閉じてから操作を続けてください。")
                 Else
                     MessageBox.Show("リストアに失敗しました。ファイルが正しい SQLite データベースか確認してください。")

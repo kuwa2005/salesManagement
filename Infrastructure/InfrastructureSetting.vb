@@ -9,10 +9,12 @@ Public Class InfrastructureSetting
     ''' <summary>
     ''' データベースを初期化する
     ''' </summary>
-    ''' <returns></returns>
-    Public Function InitializeDB() As Boolean
+    ''' <param name="resetDebugDatabase">DEBUG 時に既存 DB を削除して作り直す場合は True（テスト向け）</param>
+    Public Function InitializeDB(Optional ByVal resetDebugDatabase As Boolean = False) As Boolean
 #If DEBUG Then
-        InitializeDebugDB()
+        If resetDebugDatabase OrElse IsDebugResetRequested() Then
+            ResetDebugDatabase()
+        End If
 #End If
         If IsExistDB() = False Then
             execDDL()
@@ -42,26 +44,33 @@ Public Class InfrastructureSetting
     End Sub
 
     ''' <summary>
-    ''' デバッグ用にデータベースを初期化する
+    ''' 環境変数またはセンチネルファイルで DEBUG DB リセットが要求されているか
     ''' </summary>
-    Private Sub InitializeDebugDB()
+    Private Shared Function IsDebugResetRequested() As Boolean
+        Dim resetEnv = Environment.GetEnvironmentVariable("SM_RESET_DEBUG_DB")
+        Return String.Equals(resetEnv, "1", StringComparison.Ordinal) OrElse
+            IO.File.Exists("RESET_DEBUG_DB")
+    End Function
+
+    ''' <summary>
+    ''' デバッグ用データベースファイルを削除する
+    ''' </summary>
+    Private Sub ResetDebugDatabase()
         ' 接続プールが残っていると Delete に失敗するため解放する
         System.Data.SQLite.SQLiteConnection.ClearAllPools()
         GC.Collect()
         GC.WaitForPendingFinalizers()
 
-        If System.IO.File.Exists("myDb.db") Then
-            System.IO.File.Delete("myDb.db")
+        If IO.File.Exists("myDb.db") Then
+            IO.File.Delete("myDb.db")
         End If
     End Sub
 
     ''' <summary>
     ''' DBが既に存在している場合はTrue
     ''' </summary>
-    ''' <param name="path"></param>
-    ''' <returns></returns>
     Private Function IsExistDB() As Boolean
-        If System.IO.File.Exists(InfrastractureBackup.GetDBPath()) = True Then
+        If IO.File.Exists(InfrastructureBackup.GetDBPath()) = True Then
             Return True
         End If
         Return False
