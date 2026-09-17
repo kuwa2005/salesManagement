@@ -1,5 +1,8 @@
 ﻿Option Strict On
 Option Infer On
+
+Imports System.IO
+Imports System.Reflection
 Imports Microsoft.Reporting.WinForms
 
 ''' <summary>
@@ -9,7 +12,9 @@ Public Class EstimateReportViewer
 
 #Region "定数"
 
-    Private Const ESTIMATE_REPORT_FILE_NAME = "Estimate.rdlc"
+    Private Const MainReportResource As String = "Application.Report.Estimate.rdlc"
+    Private Const DetailReportResource As String = "Application.Report.EstimateDetail.rdlc"
+    Private Const DetailSubreportName As String = "EstimateDetail"
 
 #End Region
 
@@ -34,22 +39,15 @@ Public Class EstimateReportViewer
     ''' <summary>
     ''' ビュワーロード時
     ''' </summary>
-    ''' <param name="sender"></param>
-    ''' <param name="e"></param>
     Private Sub EstimateReportViewer_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         UpdateReport()
-        Me.ReportViewer.RefreshReport()
-        'SubReportProcessingEventHandlerを追加する。
-        AddHandler Me.ReportViewer.LocalReport.SubreportProcessing, AddressOf SubReportProcessingEventHandler
     End Sub
 
     ''' <summary>
     ''' サブレポート処理時に呼び出されるイベント
-    ''' サブレポートで使用するデータソースにデータを指定する
     ''' </summary>
-    ''' <param name="sender"></param>
-    ''' <param name="e"></param>
     Public Sub SubReportProcessingEventHandler(ByVal sender As Object, ByVal e As SubreportProcessingEventArgs)
+        e.DataSources.Clear()
         e.DataSources.Add(New ReportDataSource("EstimateDetailDataSet", MakeDetailsList))
     End Sub
 
@@ -60,7 +58,6 @@ Public Class EstimateReportViewer
     ''' <summary>
     ''' 明細のサブレポート用にリストを構成する
     ''' </summary>
-    ''' <returns></returns>
     Private Function MakeDetailsList() As List(Of EstimateDetailReportPresenter)
         Dim ret As New List(Of EstimateDetailReportPresenter)
         If _PreviewEstimate Is Nothing OrElse _PreviewEstimate.Details Is Nothing Then
@@ -83,33 +80,42 @@ Public Class EstimateReportViewer
             Return
         End If
 
-        '一度リセット
         ReportViewer.Reset()
-        'サーバを使わずローカル制御
-        ReportViewer.ProcessingMode = Microsoft.Reporting.WinForms.ProcessingMode.Local
-        'レポートファイルの場所
-        ReportViewer.LocalReport.ReportPath = GetReportFilePath()
+        ReportViewer.ProcessingMode = ProcessingMode.Local
+        ' Reset 後の LocalReport に対して、Refresh 前にハンドラを付ける
+        AddHandler ReportViewer.LocalReport.SubreportProcessing, AddressOf SubReportProcessingEventHandler
+        LoadReportsFromEmbeddedResources()
 
-        'レポートのデータソースを準備
         BindingSource.DataSource = New EstimateReportPresenter(_PreviewEstimate)
         Dim rds = New ReportDataSource("EstimateDataSet", BindingSource)
-
-        'レポートへデータソースを設定
         ReportViewer.LocalReport.DataSources.Add(rds)
         ReportViewer.RefreshReport()
     End Sub
 
     ''' <summary>
-    ''' レポートファイルのパスを取得
+    ''' 埋め込み rdlc からメイン／サブレポート定義を読み込む
     ''' </summary>
-    ''' <returns></returns>
-    Private Function GetReportFilePath() As String
-#If DEBUG Then
-        Return IO.Path.Combine(Environment.CurrentDirectory, "../../Report", ESTIMATE_REPORT_FILE_NAME)
+    Private Sub LoadReportsFromEmbeddedResources()
+        Dim asm = Assembly.GetExecutingAssembly()
 
-#Else
-        return IO.Path.Combine(Environment.CurrentDirectory, "Report", ESTIMATE_REPORT_FILE_NAME)
-#End If
+        Using mainStream = OpenEmbeddedReport(asm, MainReportResource)
+            ReportViewer.LocalReport.LoadReportDefinition(mainStream)
+        End Using
+
+        Using detailStream = OpenEmbeddedReport(asm, DetailReportResource)
+            ReportViewer.LocalReport.LoadSubreportDefinition(DetailSubreportName, detailStream)
+        End Using
+    End Sub
+
+    ''' <summary>
+    ''' 埋め込みリソースのストリームを開く
+    ''' </summary>
+    Private Shared Function OpenEmbeddedReport(ByVal asm As Assembly, ByVal resourceName As String) As Stream
+        Dim stream = asm.GetManifestResourceStream(resourceName)
+        If stream Is Nothing Then
+            Throw New InvalidOperationException("帳票リソースが見つかりません: " & resourceName)
+        End If
+        Return stream
     End Function
 
 #End Region
