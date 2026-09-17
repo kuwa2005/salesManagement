@@ -70,6 +70,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.119" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Helper.vb" />
     <Compile Include="InfrastractureBackup.vb" />
     <Compile Include="InfrastructureSetting.vb" />

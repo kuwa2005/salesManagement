@@ -740,7 +740,7 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5466E43BAE9D41E992AE6468048F5F82"
             {
-            "SourcePath" = "8:..\\packages\\System.Data.SQLite.Core.1.0.107.0\\build\\net46\\x64\\SQLite.Interop.dll"
+            "SourcePath" = "8:..\\Application\\bin\\Release\\x64\\SQLite.Interop.dll"
             "TargetName" = "8:SQLite.Interop.dll"
             "Tag" = "8:"
             "Folder" = "8:_072B6EDC700D4D019F803804D888F095"
@@ -791,7 +791,7 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_67F655E8C0C84E55A0B201348E1A0118"
             {
-            "SourcePath" = "8:..\\packages\\System.Data.SQLite.Core.1.0.107.0\\build\\net46\\x86\\SQLite.Interop.dll"
+            "SourcePath" = "8:..\\Application\\bin\\Release\\x86\\SQLite.Interop.dll"
             "TargetName" = "8:SQLite.Interop.dll"
             "Tag" = "8:"
             "Folder" = "8:_9C0076373AF34E4B8C3A0B9848CE097C"

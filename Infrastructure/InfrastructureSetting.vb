@@ -45,8 +45,14 @@ Public Class InfrastructureSetting
     ''' デバッグ用にデータベースを初期化する
     ''' </summary>
     Private Sub InitializeDebugDB()
-        'SQLiteファイルを削除
-        System.IO.File.Delete("myDb.db")
+        ' 接続プールが残っていると Delete に失敗するため解放する
+        System.Data.SQLite.SQLiteConnection.ClearAllPools()
+        GC.Collect()
+        GC.WaitForPendingFinalizers()
+
+        If System.IO.File.Exists("myDb.db") Then
+            System.IO.File.Delete("myDb.db")
+        End If
     End Sub
 
     ''' <summary>

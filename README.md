@@ -14,11 +14,36 @@ Visual Studio 2026 (Community) で開発・ビルドすることを想定して�
 
  1. ADO.NET (`System.Data.SQLite.Core`)
  1. Microsoft Report Viewer (`Microsoft.ReportingServices.ReportViewerControl.Winforms`)
+ 1. Microsoft Visual Studio Installer Projects（MSI 用。Marketplace 拡張）
  1. MSTest
 
 ターゲットフレームワークは **.NET Framework 4.8** です（Developer Pack のインストールが必要です）。
 
-インストーラ (`Setup/Setup.vdproj`) はソリューションから除外しています。再ビルドする場合は Visual Studio Marketplace の **Microsoft Visual Studio Installer Projects** 拡張を入れ、ソリューションにプロジェクトを追加してください。
+### インストーラ拡張（初回のみ）
+
+`Setup` プロジェクト（`.vdproj`）を開くには、Visual Studio 2026 で次を入れます。
+
+1. **拡張機能** → **拡張機能の管理**
+2. `Installer Projects` で検索
+3. **Microsoft Visual Studio Installer Projects 2022** をダウンロード
+4. Visual Studio を終了して拡張のインストールを完了
+
+## ビルド（アプリ）
+
+Visual Studio 2026 で `SalesManagement.sln` を開き、NuGet 復元後にビルドしてください。
+
+コマンドライン例:
+
+```bat
+msbuild SalesManagement.sln /t:Restore,Build /p:Configuration=Debug /p:BuildProjectReferences=true
+```
+
+## ビルド（インストーラ MSI）
+
+1. 構成を **Release** にする
+2. 先に **Application** をビルドする（`bin\Release\x86` / `x64` に `SQLite.Interop.dll` が出る）
+3. **Setup** を右クリック → **リビルド**
+4. 出力は `Setup\Release\` 配下の `.msi` / `setup.exe`
 
 ## 機能
 
@@ -47,7 +72,7 @@ Visual Studio 2026 (Community) で開発・ビルドすることを想定して�
 
 ## アプリケーション設計/構成
 
-このアプリケーションは7つのプロジェクトで構成されています（Setup は別途）。
+このアプリケーションは8つのプロジェクトで構成されています.
 
 ```
 ├─ADOWrapper
@@ -63,12 +88,15 @@ Visual Studio 2026 (Community) で開発・ビルドすることを想定して�
 ├─Infrastructure
 │  ├─DDL
 │  └─RepositoryImpl
+├─Setup
 ├─TestADOWrapper
 ├─TestDomain
 ├─TestInfrastructure
 ```
 
 Testから始まるプロジェクトは各プロジェクトのテストプロジェクトです.
+
+Setupはインストーラ作成のためのプロジェクトです.
 
 各プロジェクトの依存関係は以下の通りです.(Testプロジェクトを除く)
 
@@ -140,16 +168,6 @@ Domainプロジェクトのデータ構造をそのままバインディング�
       ------------------
       | User Interface |
       ------------------
-```
-
-## ビルド
-
-Visual Studio 2026 で `SalesManagement.sln` を開き、NuGet 復元後にビルドしてください。
-
-コマンドライン例:
-
-```bat
-msbuild SalesManagement.sln /t:Restore,Build /p:Configuration=Debug
 ```
 
 ## デモデータ
