@@ -63,6 +63,9 @@ Public Class EstimateReportViewer
     ''' <returns></returns>
     Private Function MakeDetailsList() As List(Of EstimateDetailReportPresenter)
         Dim ret As New List(Of EstimateDetailReportPresenter)
+        If _PreviewEstimate Is Nothing OrElse _PreviewEstimate.Details Is Nothing Then
+            Return ret
+        End If
 
         For Each d In _PreviewEstimate.Details
             Dim p = New EstimateDetailReportPresenter(d)
@@ -76,6 +79,10 @@ Public Class EstimateReportViewer
     ''' レポートを表示する
     ''' </summary>
     Private Sub UpdateReport()
+        If _PreviewEstimate Is Nothing Then
+            Return
+        End If
+
         '一度リセット
         ReportViewer.Reset()
         'サーバを使わずローカル制御

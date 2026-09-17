@@ -89,7 +89,7 @@ Public Class EstimateEntry
         If cr Is Nothing Then
             Return
         End If
-        RemoveRowFromDetail(cr.Index)
+        RemoveRowFromDetail(cr)
     End Sub
 
     ''' <summary>
@@ -159,6 +159,12 @@ Public Class EstimateEntry
         'プレビューに入る前に検証
         If _Estimate.Validate = False Then
             MessageBox.Show("無効な項目があります")
+            Return
+        End If
+
+        Dim companyRepo = New Infrastructure.CompanyInformationImpl
+        If companyRepo.Find() Is Nothing Then
+            MessageBox.Show("自社情報が登録されていません。先に自社情報を登録してください。")
             Return
         End If
 
@@ -435,8 +441,15 @@ Public Class EstimateEntry
     ''' <summary>
     ''' 指定行を削除
     ''' </summary>
-    Private Sub RemoveRowFromDetail(ByVal idx As Integer)
-        _Estimate.RemoveDetail(idx)
+    Private Sub RemoveRowFromDetail(ByVal row As DataGridViewRow)
+        If row Is Nothing OrElse row.DataBoundItem Is Nothing Then
+            Return
+        End If
+        Dim detail = TryCast(row.DataBoundItem, Domain.EstimateDetail)
+        If detail Is Nothing Then
+            Return
+        End If
+        _Estimate.RemoveDetail(detail.DisplayOrder)
         _DetailsBindingList.ResetBindings()
     End Sub
 

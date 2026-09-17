@@ -10,11 +10,16 @@ Public Class EstimateReportPresenter
 
     Public Sub New(ByVal estimate As Domain.Estimate)
         InitializeDefaultValue()
-        InitializeByEstimate(estimate)
+        If estimate IsNot Nothing Then
+            InitializeByEstimate(estimate)
+        End If
 
         '自社情報を取得
         Dim repo = New Infrastructure.CompanyInformationImpl
         Dim c = repo.Find
+        If c Is Nothing Then
+            Throw New InvalidOperationException("自社情報が登録されていません。先に自社情報を登録してください。")
+        End If
 
         InitializeByCompany(c)
     End Sub
@@ -202,7 +207,9 @@ Public Class EstimateReportPresenter
         '発行日
         _IssueDate = e.IssueDate.ToString("yyyy/MM/dd")
         '顧客名
-        _CustomerName = e.Customer.Name
+        If e.Customer IsNot Nothing Then
+            _CustomerName = e.Customer.Name
+        End If
         '件名
         _Title = e.Title
         '御見積金額
@@ -210,7 +217,9 @@ Public Class EstimateReportPresenter
         '納期
         _DueDate = e.DueDate.ToString("yyyy/MM/dd")
         '支払条件
-        _PaymentCondition = e.PaymentCondition.Name
+        If e.PaymentCondition IsNot Nothing Then
+            _PaymentCondition = e.PaymentCondition.Name
+        End If
         '見積有効期限
         _EffectiveDate = e.EffectiveDate.ToString("yyyy/MM/dd")
         '備考
